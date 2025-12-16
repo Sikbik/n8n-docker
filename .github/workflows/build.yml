@@ -20,7 +20,7 @@ jobs:
       - name: Get upstream digest
         id: upstream
         run: |
-          DIGEST=$(docker manifest inspect docker.n8n.io/n8nio/n8n:latest -v | jq -r '.Descriptor.digest')
+          DIGEST=$(docker buildx imagetools inspect docker.n8n.io/n8nio/n8n:latest --raw | sha256sum | awk '{print "sha256:"$1}')
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           echo "Upstream digest: $DIGEST"
 
