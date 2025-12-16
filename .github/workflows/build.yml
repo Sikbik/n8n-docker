@@ -27,15 +27,12 @@ jobs:
       - name: Get current base digest from our image
         id: current
         run: |
-          # Try to get the label from our existing image, default to "none" if image doesn't exist
-          DIGEST=$(docker manifest inspect runonflux/n8n:latest -v 2>/dev/null | jq -r '.Descriptor.config.Labels["base.digest"] // "none"' 2>/dev/null || echo "none")
-
-          # If that didn't work, try pulling and inspecting
-          if [ "$DIGEST" = "none" ]; then
-            docker pull runonflux/n8n:latest 2>/dev/null || true
-            DIGEST=$(docker inspect runonflux/n8n:latest 2>/dev/null | jq -r '.[0].Config.Labels["base.digest"] // "none"' || echo "none")
+          # Pull our image and read the base.digest label
+          if docker pull runonflux/n8n:latest 2>/dev/null; then
+            DIGEST=$(docker inspect runonflux/n8n:latest | jq -r '.[0].Config.Labels["base.digest"] // "none"')
+          else
+            DIGEST="none"
           fi
-
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           echo "Current base digest: $DIGEST"
 
